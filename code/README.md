@@ -13,5 +13,3 @@
 - Vivitforclassification, Vivitmodel 두 사전학습 차이 확인, 실험 세팅 고정
 
 - grad cam code: 수정 중에 있음, classification과 파일 분리 체제로 진행 예정
-
-- test data로 사용할 
