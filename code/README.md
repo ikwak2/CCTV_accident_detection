@@ -3,10 +3,10 @@
 - 사용 데이터(블랙박스 영상) 링크: https://github.com/Cogito2012/CarCrashDataset?tab=readme-ov-file#overview
 
 - 기존에 사용하던 car accident cctv data: https://drive.google.com/drive/folders/1ozfZbz8wRoNqKknC59IPXP_twKgmCOaA
-- test data로 사용 예정
+  - test data로 사용 예정
 
 - UCF101 데이터 https://www.crcv.ucf.edu/data/UCF101.php
-- - general data에서의 사고, 비사고 score 확인용
+  - general data에서의 사고, 비사고 score 확인용
 
 #### 250507 개선 사항
 
