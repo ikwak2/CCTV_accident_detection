@@ -3,9 +3,15 @@
 - 사용 데이터(블랙박스 영상) 링크: https://github.com/Cogito2012/CarCrashDataset?tab=readme-ov-file#overview
 
 - 기존에 사용하던 car accident cctv data: https://drive.google.com/drive/folders/1ozfZbz8wRoNqKknC59IPXP_twKgmCOaA
+- test data로 사용 예정
 
-#### 250429 개선 사항
+- UCF101 데이터 https://www.crcv.ucf.edu/data/UCF101.php
+- - general data에서의 사고, 비사고 score 확인용
 
-- 메모리 부담을 줄이기 위해 DistributedDataParallel를 사용해 진행, vivit model에 먼저 적용
+#### 250507 개선 사항
+
+- Vivitforclassification, Vivitmodel 두 사전학습 차이 확인, 실험 세팅 고정
 
 - grad cam code: 수정 중에 있음, classification과 파일 분리 체제로 진행 예정
+
+- test data로 사용할 
