@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import torch
 import json
+import matplotlib.pyplot as plt
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from peft import LoraConfig, get_peft_model
@@ -23,7 +24,7 @@ from pytorch_grad_cam import GradCAM, \
 from pytorch_grad_cam.ablation_layer import AblationLayerVit
 
 import sys
-sys.path.append("/Data3/hj24/CCTV/main/vivit")
+sys.path.append("/Data3/hj24/CCTV/main")
 from vivit import sample_frame_indices, read_video_pyav
 
 def get_args():
@@ -56,6 +57,7 @@ def reshape_transform(tensor, height=14, width=14, time=time):
     
 def main():
     args = get_args()
+    torch.cuda.set_device(1)
     device = torch.device(args.device)
 
     # 모델 로드 (LoRA 적용)
@@ -65,11 +67,13 @@ def main():
         r=8, lora_alpha=16, target_modules=["attention.output.dense"], lora_dropout=0.1
     )
     model = get_peft_model(model, lora_config)
-    model.load_state_dict(torch.load(args.model_path, map_location=device))
+    state_dict = torch.load(args.model_path, map_location=device)
+    model.load_state_dict(state_dict, strict=False)
+    # model.load_state_dict(torch.load(args.model_path, map_location=device))
     model.eval()
 
     # 타겟 레이어 설정
-    target_layers = [model.vivit.encoder.layers[-1].norm]
+    target_layers = [model.vivit.encoder.layer[-1].layernorm_before]
 
     # 예측 결과 읽기
     with open(args.predictions_file, "r") as f:
@@ -139,6 +143,24 @@ def main():
             cv2.putText(cam_image, text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             out.write(cam_image[:, :, ::-1])
         out.release()
+
+def visualize_gradcam_matplotlib(frames, cams, class_label="Accident"):
+    """
+    frames: (T, H, W, 3) - 원본 RGB 이미지 시퀀스
+    cams: (T, H, W) - Grad-CAM 마스크 (0~1 정규화된 값)
+    """
+    for i in range(len(frames)):
+        frame = np.float32(frames[i]) / 255.0  # normalize to 0~1
+        cam = cams[i]
+
+        fig, ax = plt.subplots()
+        ax.imshow(frame)
+        heatmap = ax.imshow(cam, cmap='jet', alpha=0.5)  # heatmap over frame
+        plt.axis('off')
+        plt.title(f"{class_label} - Frame {i+1}")
+        fig.colorbar(heatmap, ax=ax)
+        plt.show()
+        plt.close()
 
 if __name__ == '__main__':
     main()
