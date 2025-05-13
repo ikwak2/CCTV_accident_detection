@@ -5,7 +5,7 @@
 - 기존에 사용하던 car accident cctv data: https://drive.google.com/drive/folders/1ozfZbz8wRoNqKknC59IPXP_twKgmCOaA
   - test data로 사용 예정
 
-- UCF101 데이터 https://www.crcv.ucf.edu/data/UCF101.php
+- UCF Crime 데이터 https://www.crcv.ucf.edu/research/real-world-anomaly-detection-in-surveillance-videos/
   - general data에서의 사고, 비사고 score 확인용
 
 #### 250507 개선 사항
