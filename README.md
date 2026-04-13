@@ -21,3 +21,8 @@ Generalization: UCF Crime 101 https://www.crcv.ucf.edu/research/real-world-anoma
 
 --------------------------------------------
 ## Repository Structure
+
+--------------------------------------------
+## Visualization
+We provide attention rollout visualization results.
+![Attention_rollout_1]()
