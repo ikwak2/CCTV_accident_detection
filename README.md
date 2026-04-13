@@ -41,7 +41,6 @@ CCTV_accident_detection/
 ## Installation
 
 ```text
-## Installation
 pip install -r requirements.txt
 ```
 
