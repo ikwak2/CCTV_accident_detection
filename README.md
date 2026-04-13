@@ -25,4 +25,4 @@ Generalization: UCF Crime 101 https://www.crcv.ucf.edu/research/real-world-anoma
 --------------------------------------------
 ## Visualization
 We provide attention rollout visualization results.
-![Attention_rollout_1]()
+![Attention_rollout_1](https://github.com/ikwak2/CCTV_accident_detection/blob/dfecce75efd3148149cb0f1832958db653589fa5/main/assets/Attention_rollout_1.gif)
