@@ -30,7 +30,6 @@ CCTV_accident_detection/
 ├── cam/
 ├── models/
 ├── utils/
-├── configs/
 │
 ├── LICENSE
 └── README.md
