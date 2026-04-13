@@ -25,10 +25,15 @@ Generalization: UCF Crime 101 https://www.crcv.ucf.edu/research/real-world-anoma
 CCTV_accident_detection/
 │
 ├── assets/
+
 ├── cam/
+
 ├── models/
+
 ├── utils/
+
 ├── configs/
+
 └── README.md
 
 --------------------------------------------
