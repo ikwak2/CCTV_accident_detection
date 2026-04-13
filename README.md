@@ -33,6 +33,7 @@ CCTV_accident_detection/
 │
 ├── LICENSE
 └── README.md
+```
 
 --------------------------------------------
 ## Visualization
