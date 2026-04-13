@@ -40,15 +40,18 @@ CCTV_accident_detection/
 
 ## Installation
 
-```md
+```text
 ## Installation
 pip install -r requirements.txt
+```
 
 --------------------------------------------
 
 ## Training
 
+```text
 python train.py
+```
 
 --------------------------------------------
 
