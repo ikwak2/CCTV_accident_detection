@@ -1,5 +1,7 @@
 # Real-Time CCTV-Based Traffic Accident Detection for Transportation Safety Monitoring Using Parameter-Efficient Video Transformers
 
+## Overview
+This repository implements a real-time CCTV-based accident detection system using parameter-efficient video transformers (Binary ViViT + LoRA).
 
 --------------------------------------------
 
