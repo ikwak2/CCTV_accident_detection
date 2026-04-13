@@ -6,6 +6,7 @@ This repository implements a real-time CCTV-based accident detection system usin
 --------------------------------------------
 
 ## Dataset
+
 CADP data: https://ankitshah009.github.io/accident_forecasting_traffic_camera
  
 ![CADP](https://github.com/user-attachments/assets/68898de4-f555-43ea-9879-119a22d5bc9f)
@@ -26,14 +27,28 @@ Generalization: UCF Crime 101 https://www.crcv.ucf.edu/research/real-world-anoma
 ```text
 CCTV_accident_detection/
 │
-├── assets/
-├── cam/
-├── models/
-├── utils/
+├── assets/        # visualization results (gif)
+├── cam/           # Grad-CAM and Attention-Rollout
+├── models/        # video transformer models (ViViT, TimeSformer, VideoMAE)
+├── utils/         # utility functions for model handling
 │
 ├── LICENSE
 └── README.md
 ```
+
+--------------------------------------------
+
+## Installation
+
+```md
+## Installation
+pip install -r requirements.txt
+
+--------------------------------------------
+
+## Training
+
+python train.py
 
 --------------------------------------------
 
