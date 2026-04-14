@@ -23,7 +23,7 @@ UTIC: https://www.utic.go.kr/guide/utisRefCctv.do
 CCTV_accident_detection/
 │
 ├── assets/        # visualization results (gif)
-├── cam/           # Grad-CAM and Attention-Rollout
+├── cam/           # Grad-CAM and Attention-Rollout, YOLO
 ├── models/        # video transformer models (ViViT, TimeSformer, VideoMAE)
 ├── utils/         # utility functions for model handling
 │
