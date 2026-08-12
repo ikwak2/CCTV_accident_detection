@@ -513,11 +513,11 @@ train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, va
 print(f"Train: {len(train_dataset)}, Validation: {len(val_dataset)}, Test: {len(test_dataset)}")
 
 # DataLoader 설정 (매 에폭마다 데이터 순서를 랜덤하게)
-train_loader = DataLoader(train_dataset, batch_size=20, shuffle=True,
+train_loader = DataLoader(train_dataset, batch_size=24, shuffle=True,
                           num_workers=4, pin_memory=True, persistent_workers=True)
-val_loader   = DataLoader(val_dataset,   batch_size=20, shuffle=False,
+val_loader   = DataLoader(val_dataset,   batch_size=24, shuffle=False,
                           num_workers=4, pin_memory=True, persistent_workers=True)
-test_loader  = DataLoader(test_dataset,  batch_size=20, shuffle=False,
+test_loader  = DataLoader(test_dataset,  batch_size=24, shuffle=False,
                           num_workers=4, pin_memory=True, persistent_workers=True)
 ###################################################################################################################
 ########################################### Classification ########################################################
