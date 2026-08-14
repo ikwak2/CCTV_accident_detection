@@ -468,18 +468,18 @@ model.classifier = nn.Sequential(
     nn.Linear(256, NUM_CLASSES)
 )
 
-# model = get_peft_model(model, lora_config)
+# --- LoRA ON ---
+model = get_peft_model(model, lora_config)
 # model.print_trainable_parameters() # 확인용
 # model = VideoClassifier(base_model)
 # model.apply(initialize_classifier_weights)
 
-# --- LoRA ON ---
-for p in model.parameters():
-    p.requires_grad = False
+# for p in model.parameters():
+#     p.requires_grad = False
 
-for n, p in model.named_parameters():
-    if "classifier" in n or "lora_" in n.lower():
-        p.requires_grad = True
+# for n, p in model.named_parameters():
+#     if "classifier" in n or "lora_" in n.lower():
+#         p.requires_grad = True
         
 # --- LoRA OFF ---
 # for p in model.parameters():
