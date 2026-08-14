@@ -438,6 +438,13 @@ model = get_peft_model(model, lora_config)
 # model.print_trainable_parameters() # 확인용
 # model = VideoClassifier(base_model)
 # model.apply(initialize_classifier_weights)
+
+# for p in model.parameters():
+#     p.requires_grad = False
+
+# for n, p in model.named_parameters():
+#     if "classifier" in n or "lora_" in n.lower():
+#         p.requires_grad = True
         
 # --- LoRA OFF ---
 # for p in model.parameters():
