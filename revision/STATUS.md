@@ -1,13 +1,13 @@
 # ORV revision 실행 상태
 
-확인 시각: **2026-11-06T23:54:24+09:00** (Asia/Seoul). 이 문서는 해당 시각의 GitHub 스냅샷이다. 최신 큐와 진행률은 server1의 `/disk1/orv_revision_20261106/results/STATUS.md`, `queue_status.json`, 각 run의 `progress.json`에 자동 기록된다.
+확인 시각: **2026-11-06T23:58:37+09:00** (Asia/Seoul). 이 문서는 해당 시각의 GitHub 스냅샷이다. 최신 큐와 진행률은 server1의 `/disk1/orv_revision_20261106/results/STATUS.md`, `queue_status.json`, 각 run의 `progress.json`에 자동 기록된다.
 
 ## 현재 실행
 
 | server1 GPU | 실행 내용 | 진행 |
 |---|---|---|
-| GPU 0 | 기존 VideoMAE checkpoint의 MLP 헤드를 교정한 FP32 외부 평가 | 501/1150영상 |
-| GPU 1 | ViViT Q/K/V/output LoRA, CADP+UTIC, seed 42 | epoch 1, step 800/1246 |
+| GPU 0 | 기존 VideoMAE checkpoint의 MLP 헤드를 교정한 FP32 외부 평가 | 741/1150영상 |
+| GPU 1 | ViViT Q/K/V/output LoRA, CADP+UTIC, seed 42 | epoch 2, step 700/1246 (첫 epoch 완료) |
 
 후속 작업은 공통 우선순위 큐에 등록돼 있다. **8설정 × 3seed = 24회 학습**, 각 best checkpoint의 dev/test/UCF 평가, 세 모델 자원 benchmark, 통계 집계, 주석 템플릿, 공통 설명·perturbation 진단을 순서대로 실행한다.
 
@@ -43,6 +43,7 @@
 - VideoMAE projection forward 보정 전후 FP32 logit 최대 차이: `2.46e-07`.
 - 아래 모든 설정에서 학습될 LoRA B의 실제 gradient를 확인했고, 사용되지 않는 `original_module`은 고정했다.
 - 실제 기존 VideoMAE checkpoint의 MLP 헤드가 `strict=True`로 로드됨을 확인했다.
+- 새 ViViT 첫 epoch를 완료했고 best/last checkpoint 저장 및 best의 strict 재로딩·manifest 해시 일치를 확인했다. 첫 epoch 약 282.5초, peak allocated VRAM 약 5.18 GiB다.
 - 두 worker의 중복 claim 방지·선행 작업 실패 차단·자신의 중단 작업 복구 테스트 통과.
 - 인코딩된 영상에서 요청 시간창 이후 프레임을 입력하지 않는 검사와 토큰 grid 검증 통과.
 - paired group bootstrap 및 source-calibration 재선택을 포함하는 MDR 분석 smoke check 통과. 실제 CI는 평가 완료 후 산출된다.
