@@ -1,0 +1,13 @@
+__pycache__/
+.pytest_cache/
+private/
+runs/
+cache/
+*.sqlite*
+*.pth
+*.pt
+*.safetensors
+*.mp4
+*.avi
+*.npy
+*.npz
