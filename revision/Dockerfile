@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir \
     opencv-python-headless==4.10.0.84 av==13.1.0 pillow==11.0.0 \
     pandas==2.2.3 threadpoolctl==3.5.0
 WORKDIR /app
-CMD ["python", "-u", "revision/queue.py", "worker", "--root", "/results"]
+CMD ["python", "-u", "revision/experiment_queue.py", "worker", "--root", "/results"]
