@@ -90,3 +90,9 @@ CAM은 각 모델·방법의 전체 4초 최대값으로 나눠 0–1로 표시�
 서버 주 산출물은 `/disk1/orv_revision_20261106/results/cam_road20_20261107`, 입력 후보 sheet는 `cam_road_screen_20261107`, 처음 실내 음성을 포함한 진단은 `cam_comparison_20261107`이다. 모델 코드는 기존 읽기 전용 `e534642` release, 추가 CAM 코드는 결과 디렉터리의 별도 snapshot을 사용했다. Docker는 네트워크 없이 원본 데이터에 읽기 전용 접근하며 server1의 물리 GPU 0·1만 사용했다. 기존 분류 평가를 중단하지 않았다. 일회성 CAM 컨테이너는 `restart=no`로 종료한다.
 
 로컬 주 산출물은 이 작업의 `outputs/ORV_CAM_ROAD20_20261107/`이다. 공개 파일은 사용자의 후속 게시 요청에 따라 `revision/viz/`에 복사했다. private 선택·모델 계약·원래 맵·렌더러·최종 파일 해시를 각각 보존한다.
+
+## MP4 비교 영상
+
+사용자 후속 요청으로 같은 20사례의 MP4와 사고·비사고별 이어 보기 2개를 `viz/videos/`에 추가했다. 기존 PNG 시점은 중앙 입력 구간 약 2/3 지점이며 시작 프레임이 아니다. MP4는 해당 구간 시작부터 약 4초를 재생한다. 추가 정중앙 이미지는 요청 취소에 따라 만들지 않았다.
+
+CPU에서 공통 decoder/crop으로 RGB를 추출하고 기존 16/32시점 맵만 시간 선형 보간했다. 새 모델 추론·checkpoint 변경·GPU 작업은 하지 않았다. 24 FPS H.264/yuv420p/faststart, 무음이며 모든 프레임의 디코딩·단조 증가 timestamp·개수·크기를 검사했다. 두 묶음은 재인코딩 없이 packet remux했다. 재현 코드는 `render_cam_videos.py`, 게시 코드는 `package_cam_videos.py`다. 시각은 원본 영상의 요청 시각이며 RGB는 그 이전 마지막 프레임이다. 확률은 고정 구간 값이고 raw attention·CAM의 해석 한계와 TimeSformer 설정 문제는 위와 같다.

@@ -74,3 +74,5 @@ python revision/run.py preflight --root /results --out /results/preflight
 ```
 
 결과가 나오기 전에 모델 순위나 ORV 통과 여부를 정하지 않는다. 운영자 효용, 연속 경보 지연, full-pipeline 처리량, 추적 정확도는 아직 별도 검증 항목이다.
+
+같은 20사례의 중앙 약 4초 구간을 [MP4 비교 영상](viz/videos/README.md)으로 추가했다. 정중앙 정지 이미지는 추가하지 않았으며, 기존 맵을 시간축 보간해 재생한다.
