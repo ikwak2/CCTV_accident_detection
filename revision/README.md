@@ -6,6 +6,8 @@
 
 완료된 CADP+UTIC 주 실험의 3-seed 중간 집계와 threshold 해석은 [INTERIM_RESULTS.md](INTERIM_RESULTS.md)를 참고한다. 최종 전체 집계 전 자료다.
 
+새 checkpoint의 세 모델 공통 설명 맵, 수정한 VideoMAE rollout, 시각화의 관찰·한계와 재현 방법은 [VISUALIZATION_NOTES.md](VISUALIZATION_NOTES.md)에 기록했다. 분류 성능 순위와 설명 품질을 구분한다.
+
 ## 실행 범위
 
 - **server1의 물리 GPU 0·1**에 worker 하나씩 배정한다. 컨테이너 안에서는 배정된 GPU만 `cuda:0`으로 보인다.
