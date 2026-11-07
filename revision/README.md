@@ -4,6 +4,8 @@
 
 2026-11-07 사용자 요청으로 디코딩 오류 수정·재평가를 진행한다. 수정 방식과 복구 절차는 [DECODING_RECOVERY.md](DECODING_RECOVERY.md)에 기록한다.
 
+완료된 CADP+UTIC 주 실험의 3-seed 중간 집계와 threshold 해석은 [INTERIM_RESULTS.md](INTERIM_RESULTS.md)를 참고한다. 최종 전체 집계 전 자료다.
+
 ## 실행 범위
 
 - **server1의 물리 GPU 0·1**에 worker 하나씩 배정한다. 컨테이너 안에서는 배정된 GPU만 `cuda:0`으로 보인다.

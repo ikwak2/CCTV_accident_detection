@@ -1,6 +1,6 @@
 # ORV revision 실행 상태
 
-확인 시각: **2026-11-07T16:48:21+09:00** (Asia/Seoul). 이 문서는 해당 시각의 GitHub 스냅샷이다. 서버의 `/disk1/orv_revision_20261106/results/STATUS.md`, `queue_status.json`, 각 run의 `progress.json`이 최신 상태를 기록한다.
+확인 시각: **2026-11-07T21:34:16+09:00** (Asia/Seoul). 이 문서는 해당 시각의 GitHub 스냅샷이다. 서버의 `/disk1/orv_revision_20261106/results/STATUS.md`, `queue_status.json`, 각 run의 `progress.json`이 최신 상태를 기록한다.
 
 사용자가 디코딩 오류 수정 후 재실행을 요청해 **수정·검증·배포와 평가 재개를 완료**했다. 수정 근거와 재현 방법은 [DECODING_RECOVERY.md](DECODING_RECOVERY.md), 기존 원고 수정 메모는 [FOLLOW_UP_NOTES.md](FOLLOW_UP_NOTES.md)를 참고한다. 전체 실험이 완료됐다는 뜻은 아니다.
 
@@ -8,20 +8,20 @@
 
 | server1 물리 GPU | 실행 내용 | 확인된 진행 |
 |---|---|---|
-| GPU 0 | TimeSformer QKV/output, mixed, seed 42 평가 | dev 737/737, test 342/342 완료; UCF 진행 표시 141/1150 |
-| GPU 1 | ViViT Q/K/V/output, mixed, seed 42 평가 | dev 737/737, test 342/342 완료; UCF 진행 표시 221/1150 |
+| GPU 0 | ViViT output-only, mixed, seed 42 평가 | dev 737/737 완료; test 진행 표시 1/342 |
+| GPU 1 | VideoMAE Q/K/V/output, mixed, seed 44 평가 | dev 737/737, test 342/342 완료; UCF 진행 표시 661/1150 |
 
-두 모델 모두 이전에 멈춘 test 지점을 통과했다. 재개 후 실패는 현재 **0건**이다. 위 UCF 수는 `progress.json`의 표시이며 20개 간격으로 갱신돼 점수 저널의 실제 건수보다 적을 수 있다. 두 baseline 평가가 사용하는 checkpoint 해시는 완료된 학습 가중치의 16:44 SHA256 스냅샷과 일치했다.
+디코딩 수정 후 실패는 계속 **0건**이다. 위 수는 `progress.json`의 표시이며 20개 간격으로 갱신돼 점수 저널의 실제 건수보다 적을 수 있다. 남은 평가는 현재 실행 2건과 ViViT output-only seed 43/44 대기 2건이다.
 
 | 큐 상태 | 작업 수 |
 |---|---:|
-| pending | 29 |
+| pending | 3 |
 | running | 2 |
 | external_running | 0 |
-| completed | 31 |
+| completed | 57 |
 | failed | 0 |
 
-총 62작업이다. 완료 31개는 **학습 23회 + 선행 작업 3개 + legacy 진단 1개 + 분류 benchmark 3개 + 실제 평가 시간창 검사 1개**다. 새 grouped 평가 24건은 2건 실행, 22건 대기이며 dev/test/UCF를 모두 마친 최종 평가는 아직 0건이다. 복구 전 디코딩 실패 18건의 상태·오류와 기존 큐 DB는 백업 후 재등록했다.
+총 62작업 중 **57개 완료, 2개 실행, 3개 대기**다. 학습 24회는 전부 완료했고, dev/test/UCF 평가 24건은 20건 완료·2건 실행·2건 대기다. 분류 benchmark 3개, 첫 baseline 통계, 주석 템플릿 생성, 자동 설명 진단 3개도 완료했다. 마지막 평가는 ViViT output-only seed 43/44이며, 모든 평가 뒤 `stats_all`이 전체 집계를 수행한다. 복구 전 디코딩 실패 18건의 상태·오류와 기존 큐 DB는 보존했다.
 
 | 학습 설정 | seed 42 | seed 43 | seed 44 |
 |---|---|---|---|
@@ -31,10 +31,10 @@
 | ViViT Q/K/V/output, CADP-only | 완료 | 완료 | 완료 |
 | TimeSformer QKV/output, CADP-only | 완료 | 완료 | 완료 |
 | VideoMAE output-only, CADP-only | 완료 | 완료 | 완료 |
-| ViViT output-only, CADP+UTIC | 완료 | 완료 | 재개 대기: 2 epoch 저장 |
+| ViViT output-only, CADP+UTIC | 완료 | 완료 | 완료 |
 | VideoMAE Q/K/V/output, CADP+UTIC | 완료 | 완료 | 완료 |
 
-학습은 23/24회 완료이며 학습 실패는 0회다. 마지막 ViViT output-only seed 44는 배포 직전 epoch 2 저장을 마쳤고, 우선순위가 높은 첫 seed baseline 평가 뒤 마지막 완료 epoch부터 이어간다. 완료된 학습 23회를 다시 학습하지 않는다.
+학습은 **24/24회 완료**했으며 학습 실패는 0회다. 새 grouped 주 실험과 CADP-only ablation의 18개 평가를 모두 마쳤다. LoRA 교차 통제 6개 평가 중 VideoMAE seed 42/43은 완료했고 나머지 4개 평가를 진행한다. 완료된 학습을 다시 학습하지 않는다.
 
 ## 디코딩 오류 처리와 공통 평가 집합
 
@@ -57,9 +57,9 @@
 
 ## 속도와 완료 전망
 
-재개 초기 UCF 처리 속도는 모델별 약 **분당 45–60영상**이다. 남은 학습·24개 평가·통계·자동 설명 진단은 **11월 7일 22–24시 전후 완료를 추정**한다. 영상별 비용과 CPU/디스크 경합, 후속 집계 시간에 따라 자정을 넘길 수 있으며 보장 시각은 아니다. 사람의 도로 정상·onset·객체 box/ID 주석은 이 자동 큐 완료에 포함되지 않는다.
+현재 실행 중인 평가의 진행과 ViViT output-only dev 737개 처리에 약 16분이 걸린 점을 기준으로, 남은 평가·전체 통계는 **11월 7일 23시 전후(대략 22:30–23:30) 완료를 추정**한다. 영상별 비용과 후속 집계 시간에 따라 달라지며 보장 시각은 아니다. 사람의 도로 정상·onset·객체 box/ID 주석은 이 자동 큐 완료에 포함되지 않는다.
 
-첫 seed mixed 평가 3건을 우선 실행하고 남은 학습을 재개한 뒤 후속 평가·집계·주석 템플릿·설명 진단을 계속 진행한다. worker는 `unless-stopped`로 유지되고 재시작 시 마지막 완료 epoch/저널에서 이어간다.
+worker는 `unless-stopped`로 유지되고 재시작 시 점수 저널에서 이어간다. 현재 GPU 0·1은 남은 LoRA 교차 통제 평가를 처리한다. 완료된 주 실험의 3-seed 중간 집계는 [INTERIM_RESULTS.md](INTERIM_RESULTS.md)에 기록했다. 전체 통계 집계 전 자료임을 구분한다.
 
 ## 완료된 진단 결과
 
