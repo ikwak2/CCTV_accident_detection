@@ -54,6 +54,8 @@ def initialize(root):
             raise RuntimeError('Not all pretrained models have been downloaded')
         add_job(db,marker,0,[],state='completed')
     base=[sys.executable,'-u','/app/revision/run.py']
+    add_job(db,'evaluation_audit',6,[sys.executable,'-u','/app/revision/audit_evaluation.py','--root','/results'],
+            ['prepare'],state='completed' if (root/'manifests/evaluation_audit.json').exists() else 'pending')
     legacy_state='completed' if (root/'runs/legacy_videomae_corrected/metrics.json').exists() else 'external_running' if (root/'legacy_external.json').exists() else 'pending'
     add_job(db,'legacy_videomae_corrected',5,base+['legacy','--out','/results/runs/legacy_videomae_corrected','--precision','fp32'],['prepare','preflight'],legacy_state)
     configurations=[('vivit','qkvo'),('timesformer','qkvo'),('videomae','out')]
@@ -67,7 +69,7 @@ def initialize(root):
                 path='/results/runs/'+tag
                 common=['--out',path,'--model',model,'--lora',lora,'--condition',condition,'--seed',str(seed)]
                 add_job(db,'train_'+tag,priority,base+['train']+common,['prepare','preflight'])
-                add_job(db,'eval_'+tag,priority+5,base+['evaluate']+common,['train_'+tag])
+                add_job(db,'eval_'+tag,priority+5,base+['evaluate']+common,['train_'+tag,'evaluation_audit'])
                 evaluations.append('eval_'+tag)
                 if condition=='mixed' and seed==42:
                     baseline_evaluations.append('eval_'+tag)
@@ -78,7 +80,7 @@ def initialize(root):
             tag=f'{model}_{lora}_mixed_s{seed}'
             common=['--out','/results/runs/'+tag,'--model',model,'--lora',lora,'--condition','mixed','--seed',str(seed)]
             add_job(db,'train_'+tag,80,base+['train']+common,['prepare','preflight'])
-            add_job(db,'eval_'+tag,85,base+['evaluate']+common,['train_'+tag])
+            add_job(db,'eval_'+tag,85,base+['evaluate']+common,['train_'+tag,'evaluation_audit'])
             evaluations.append('eval_'+tag)
     add_job(db,'stats_baselines',36,[sys.executable,'-u','/app/revision/analyze.py','--root','/results','--stage','baseline'],baseline_evaluations)
     add_job(db,'annotation_templates',37,[sys.executable,'-u','/app/revision/annotation_pack.py','--root','/results'],baseline_evaluations)

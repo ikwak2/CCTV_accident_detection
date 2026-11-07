@@ -12,7 +12,9 @@ from common import atomic_json, read_csv, select_threshold, write_csv
 
 def bootstrap_pair(a,b,dev_a=None,dev_b=None,repetitions=2000):
     a,b={r['id']:r for r in a},{r['id']:r for r in b}
-    keys=sorted(set(a)&set(b))
+    if set(a)!=set(b):
+        raise ValueError('Paired comparison requires identical evaluated video sets')
+    keys=sorted(a)
     if not keys:return None
     assert all(a[k]['label']==b[k]['label'] and a[k]['group']==b[k]['group'] for k in keys)
     grouped=defaultdict(list)
@@ -77,6 +79,7 @@ def analyze(root,stage):
         external=result['external']['at_dev_threshold']['all']
         drop=(test['auroc']-external['auroc'])/test['auroc'] if test['auroc'] else None
         entry={k:config[k] for k in ['model','lora','condition','seed','manifest_sha256']}
+        entry['evaluation_manifest_sha256']=result['evaluation_manifest_sha256']
         entry.update(run=file.parent.name,test_auroc=test['auroc'],external_auroc=external['auroc'],
                      external_ap=external['average_precision'],external_mdr=external['missed_detection_rate'],
                      external_fpr=external['fpr'],drop_ratio=drop)
@@ -87,6 +90,8 @@ def analyze(root,stage):
                      external_candidate_screened_n=screened.get('n'))
         for boundary in [.1,.15,.2,.25]:entry[f'passes_drop_{boundary}']=int(drop<=boundary) if drop is not None else None
         rows.append(entry)
+    if len({r['evaluation_manifest_sha256'] for r in rows})>1:
+        raise ValueError('Cannot aggregate runs with different evaluation eligibility')
     write_csv(out/'run_metrics.csv',rows)
     comparisons={}
     configurations=['vivit_qkvo_mixed_s42','timesformer_qkvo_mixed_s42','videomae_out_mixed_s42']

@@ -2,6 +2,8 @@
 
 논문 수정 전략과 리뷰 의견별 대응은 [PLAN.md](PLAN.md), 실제 실행 상태는 [STATUS.md](STATUS.md)를 참고한다. 나중에 코드·원고를 수정할 때 볼 확인 근거와 위치, 현재 평가 디코딩 오류의 후속 절차는 [FOLLOW_UP_NOTES.md](FOLLOW_UP_NOTES.md)에 기록한다.
 
+2026-11-07 사용자 요청으로 디코딩 오류 수정·재평가를 진행한다. 수정 방식과 복구 절차는 [DECODING_RECOVERY.md](DECODING_RECOVERY.md)에 기록한다.
+
 ## 실행 범위
 
 - **server1의 물리 GPU 0·1**에 worker 하나씩 배정한다. 컨테이너 안에서는 배정된 GPU만 `cuda:0`으로 보인다.
@@ -39,6 +41,8 @@ rm /disk1/orv_revision_20261106/results/PAUSE
 ## 산출물
 
 - `manifests/grouped.csv`: 서버 전용 그룹·split·유효 영상 명세
+- `manifests/evaluation.csv`, `evaluation_audit.json`: 실제 5개 평가 시간창을 16/32프레임으로 검사한 공통 평가 목록과 원본/평가 manifest·decoder 해시. 학습용 grouped manifest는 유지한다.
+- `manifests/evaluation_exclusions_private.json`: 시간창 디코딩 실패 영상과 제외 근거. 모든 모델·조건·seed에 같은 제외를 적용한다.
 - `manifests/audit.json`: 집계 수와 자동 검사 한계
 - `manifests/content_candidates_private.json`: 수동 검토할 중복/카메라 후보
 - `preflight/preflight.json`: 모델·LoRA backward, legacy checkpoint, 전처리 검증
@@ -46,6 +50,7 @@ rm /disk1/orv_revision_20261106/results/PAUSE
 - `runs/RUN_ID/best.pt`, `last.pt`, `history.jsonl`: best 및 재시작 checkpoint
 - `runs/RUN_ID/{dev,test,external}/`: 영상 점수와 실제 샘플 시각
 - `runs/RUN_ID/metrics.json`: source-dev threshold 및 기본 threshold에서의 결과
+- `runs/RUN_ID/evaluation_contract.json`: checkpoint·학습/평가 manifest·decoder·precision 계약. 기존 점수를 재사용할 때 영상별 샘플 시각도 검사한다.
 - `analysis/{baseline,all}/`: 집계·민감도·paired group bootstrap
 - `annotations/`: 공통 설명 사례·도로 정상·onset·객체 box 주석 양식
 - `queue_status.json`, `STATUS.md`, `logs/`: 재시작 가능한 큐와 작업별 로그
@@ -54,10 +59,11 @@ rm /disk1/orv_revision_20261106/results/PAUSE
 
 ## 검증
 
-`test_queue.py`는 두 worker의 중복 claim 방지, 선행 작업 실패 시 차단, 자신의 중단 작업 복구를 검사한다. GPU preflight는 학습될 LoRA B의 실제 gradient와 VideoMAE forward 보정의 수치 동등성을 확인한다.
+`test_queue.py`는 두 worker의 중복 claim 방지, 선행 작업 실패 시 차단, 자신의 중단 작업 복구를 검사한다. `test_evaluation_audit.py`는 마지막 시간창 실패의 공통 제외, 평가 목록 변경 감지, 기존 점수의 샘플 시각 검증, 실패 로그·가중치를 보존하는 큐 복구를 검사한다. GPU preflight는 학습될 LoRA B의 실제 gradient와 VideoMAE forward 보정의 수치 동등성을 확인한다.
 
 ```bash
 python revision/test_queue.py
+python -m unittest discover -s revision -p 'test_*.py' -v
 python revision/run.py preflight --root /results --out /results/preflight
 ```
 

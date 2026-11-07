@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from common import (MODELS, ClipDataset, atomic_json, build_model, environment, metrics,
                     patch_videomae_projection_calls, pixels_from_frames, read_csv, read_window,
                     seed_all, select_threshold, sha256, write_csv)
+from audit_evaluation import PROTOCOL, evaluation_rows
 
 
 def autocast(precision):
@@ -85,6 +86,19 @@ def score_rows(model,processor,name,rows,out,precision='bf16',window=4.,n_clips=
                 records[row['id']]=row
             except json.JSONDecodeError:
                 pass
+    for row in rows:
+        if row['id'] not in records:
+            continue
+        cached=records[row['id']]
+        duration,fps=float(row['duration']),float(row['fps'])
+        span=min(window,duration)
+        expected=[np.linspace(start,start+max(0.,span-1/fps),MODELS[name][1])
+                  for start in np.linspace(0,max(0,duration-span),n_clips)]
+        if (any(str(cached[k])!=str(row[k]) for k in ['dataset','category','label','group','split','quarantined'])
+            or np.shape(cached.get('sample_timestamps'))!=np.shape(expected)
+            or not np.allclose(cached['sample_timestamps'],expected,rtol=0,atol=1e-8)
+            or not np.isfinite(cached['score']) or not 0<=cached['score']<=1):
+            raise RuntimeError('Cached prediction does not match evaluation contract: '+row['id'])
     model.eval()
     with open(journal,'a') as f:
         for i,row in enumerate(rows):
@@ -95,7 +109,10 @@ def score_rows(model,processor,name,rows,out,precision='bf16',window=4.,n_clips=
             starts=np.linspace(0,max(0,duration-span),n_clips)
             probabilities,timestamps=[],[]
             for start in starts:
-                frames,times=read_window(row['path'],float(start),span,MODELS[name][1],fps)
+                try:
+                    frames,times=read_window(row['path'],float(start),span,MODELS[name][1],fps)
+                except Exception as exc:
+                    raise RuntimeError(f"Decode failed for {row['id']} at start={start}, frames={MODELS[name][1]}") from exc
                 pixels=pixels_from_frames(frames,processor).unsqueeze(0).cuda()
                 with autocast(precision):
                     logits=model(pixels).logits
@@ -112,6 +129,7 @@ def score_rows(model,processor,name,rows,out,precision='bf16',window=4.,n_clips=
                 atomic_json(out/'progress.json',{'scored':len(records),'total':len(rows),'time':time.time()})
     ordered=[records[r['id']] for r in rows]
     write_csv(out/'predictions.csv',[{k:r[k] for k in ['id','dataset','category','label','group','split','quarantined','score']} for r in ordered])
+    atomic_json(out/'progress.json',{'state':'complete','scored':len(ordered),'total':len(rows),'time':time.time()})
     return ordered
 
 
@@ -167,15 +185,40 @@ def evaluate(root,run_dir,name,lora,seed,precision='bf16',legacy=False):
                 'metrics_test_selected_diagnostic':summarize_predictions(records,diag_threshold)}
         atomic_json(run_dir/'metrics.json',report)
         return
+    rows,audit=evaluation_rows(root)
     checkpoint=run_dir/'best.pt'
     saved=torch.load(checkpoint,map_location='cpu',weights_only=True)
+    config=saved['config']
+    if config['manifest_sha256']!=audit['source_manifest_sha256']:
+        raise RuntimeError('Checkpoint training manifest does not match audited source')
+    if (config['model'],config['lora'],config['seed'])!=(name,lora,seed):
+        raise RuntimeError('Checkpoint model/LoRA/seed does not match requested evaluation')
+    checkpoint_hash=sha256(checkpoint)
+    contract={'checkpoint_sha256':checkpoint_hash,'source_manifest_sha256':audit['source_manifest_sha256'],
+              'evaluation_manifest_sha256':audit['evaluation_manifest_sha256'],
+              'decoder_code_sha256':audit['decoder_code_sha256'],'sampling':PROTOCOL,'precision':precision}
+    contract_path=run_dir/'evaluation_contract.json'
+    if contract_path.exists():
+        if json.loads(contract_path.read_text())!=contract:
+            raise RuntimeError('Evaluation contract changed; archive old scores before rerunning')
+    else:
+        # The original sampler/preprocessor is unchanged. Only eligibility changes.
+        has_cached_scores=any(run_dir.glob('*/predictions_private.jsonl'))
+        if has_cached_scores and (config['environment']['code_sha256']['common.py']!=audit['decoder_code_sha256']
+                                  or config['precision']!=precision):
+            raise RuntimeError('Cannot adopt cached scores from a different decoder/preprocessor or precision')
+        atomic_json(contract_path,contract)
+        atomic_json(run_dir/'evaluation_resume.json',{'adopted_existing_scores':has_cached_scores,
+                    'reason':'same checkpoint, sampler/preprocessor hash, precision and verified per-video timestamps',
+                    'evaluation_manifest_sha256':audit['evaluation_manifest_sha256']})
     model,processor,snapshot=build_model(name,lora,root,seed)
     model.load_state_dict(saved['model'],strict=True)
     model.cuda()
     dev=score_rows(model,processor,name,[r for r in rows if r['split']=='dev'],run_dir/'dev',precision)
     threshold=select_threshold([r['label'] for r in dev],[r['score'] for r in dev])
     result={'status':'grouped_split_with_automated_content_screen_manual_review_pending',
-            'checkpoint_sha256':sha256(checkpoint),'manifest_sha256':sha256(Path(root)/'manifests/grouped.csv'),
+            'checkpoint_sha256':checkpoint_hash,'manifest_sha256':audit['source_manifest_sha256'],
+            'evaluation_manifest_sha256':audit['evaluation_manifest_sha256'],'evaluation_audit':audit,
             'model_snapshot':snapshot,'environment':environment(),'calibration':'source dev; five windows; FPR budget 0.1',
             'threshold_from_source_dev':threshold,'dev':summarize_predictions(dev,threshold)}
     for split in ['test','external']:
