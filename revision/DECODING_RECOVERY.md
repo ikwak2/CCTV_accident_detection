@@ -30,11 +30,13 @@
 Docker 내부에서 사용하는 명령:
 
 ```bash
-python revision/audit_evaluation.py --root /results --workers 8
+python revision/audit_evaluation.py --root /results --workers 4 --executor process
 # 위 검사 완료 및 기존 worker 중단 후
 python revision/recover_evaluations.py --root /results --workers-stopped
 ```
 
 ## 검증
 
-같은 Docker image의 CPU 환경에서 데이터/토큰 계약, 큐 동시 claim·복구, 공통 평가 제외·해시·기존 점수 검증을 포함한 **8개 테스트가 통과**했다. 원래 temporal sampler와 전처리는 변경하지 않았다. 실제 서버 평가의 디코딩 오류 지점 통과와 최종 평가 완료 여부는 STATUS에 별도로 기록한다.
+같은 Docker image의 CPU 환경에서 데이터/토큰 계약, 큐 동시 claim·복구, 공통 평가 제외·해시·기존 점수 검증, 실제 인코딩 영상의 spawn 프로세스 검사를 포함한 **9개 테스트가 통과**했다. 원래 temporal sampler와 전처리는 변경하지 않았다. 실제 서버 평가의 디코딩 오류 지점 통과와 최종 평가 완료 여부는 STATUS에 별도로 기록한다.
+
+처음 8개 디코딩 스레드를 사용했으나 다중 스레드의 처리량이 단독 검사보다 크게 낮아지는 병목을 관측했다. 같은 입력 한 건의 단독 16/32프레임·5시간창 검사는 약 1.53초였다. 검사 함수를 바꾸지 않고 독립된 spawn 프로세스 4개로 격리하도록 변경했다. 이미 완료된 검사 저널의 동일 decoder/manifest 계약을 확인하고 이어간다. 실행 방식과 재사용 검사 수는 audit 결과에 저장한다.

@@ -4,8 +4,10 @@ Training data are never edited. Video paths and failure records stay on server.
 """
 import argparse
 from collections import Counter
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+from functools import partial
 import json
+import multiprocessing
 from pathlib import Path
 import time
 
@@ -40,7 +42,7 @@ def counts(rows):
     return dict(sorted(Counter(f"{r['split']}:{r['dataset']}:{r['label']}" for r in rows).items()))
 
 
-def audit(root, workers=8):
+def audit(root, workers=4, executor='process'):
     root = Path(root)
     source = root/'manifests/grouped.csv'
     rows = [r for r in read_csv(source) if r['split'] in ['dev', 'test', 'external']]
@@ -58,7 +60,10 @@ def audit(root, workers=8):
             previous[item['id']] = item
     atomic_json(contract_file, contract)
     started = time.time()
-    with ThreadPoolExecutor(max_workers=workers) as pool, open(journal, 'a') as stream:
+    reused = len(previous)
+    pool_type = (partial(ProcessPoolExecutor, mp_context=multiprocessing.get_context('spawn'))
+                 if executor == 'process' else ThreadPoolExecutor)
+    with pool_type(max_workers=workers) as pool, open(journal, 'a') as stream:
         futures = {pool.submit(check_video, r): r for r in rows if r['id'] not in previous}
         for future in as_completed(futures):
             item = future.result()
@@ -81,7 +86,8 @@ def audit(root, workers=8):
     report = dict(contract, evaluation_manifest_sha256=sha256(destination),
                   total_before=len(rows), total_eligible=len(kept), total_excluded=len(excluded),
                   counts_before=counts(rows), counts_eligible=counts(kept), counts_excluded=counts(excluded),
-                  seconds=time.time()-started, training_manifest_unchanged=True)
+                  seconds=time.time()-started, training_manifest_unchanged=True,
+                  executor=executor, workers=workers, reused_checks=reused)
     atomic_json(out/'evaluation_audit.json', report)
     print('EVALUATION_AUDIT_COMPLETE', json.dumps(report), flush=True)
     return report
@@ -106,6 +112,7 @@ def evaluation_rows(root):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', default='/results')
-    parser.add_argument('--workers', type=int, default=8)
+    parser.add_argument('--workers', type=int, default=4)
+    parser.add_argument('--executor', choices=['process', 'thread'], default='process')
     args = parser.parse_args()
-    audit(args.root, args.workers)
+    audit(args.root, args.workers, args.executor)

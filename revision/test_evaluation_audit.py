@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 import numpy as np
+import cv2
 
 from audit_evaluation import audit, evaluation_rows
 from common import read_csv, sha256, write_csv
@@ -33,7 +34,7 @@ class EvaluationAuditTests(unittest.TestCase):
                     raise RuntimeError('corrupt tail packet')
                 return [None]*count,list(range(count))
             with patch('audit_evaluation.read_window',side_effect=decode):
-                report=audit(root,workers=2)
+                report=audit(root,workers=2,executor='thread')
             kept,loaded=evaluation_rows(root)
             self.assertEqual([r['id'] for r in kept],['dev','good','ucf'])
             self.assertEqual(report['total_excluded'],1)
@@ -45,7 +46,7 @@ class EvaluationAuditTests(unittest.TestCase):
             self.assertEqual(json.loads((root/'manifests/evaluation_exclusions_private.json').read_text())[0]['id'],'broken')
             # An unchanged audit can resume without decoding any completed input.
             with patch('audit_evaluation.read_window',side_effect=AssertionError('unexpected rescan')):
-                audit(root,workers=2)
+                audit(root,workers=2,executor='thread')
             (root/'manifests/evaluation.csv').write_text('modified')
             with self.assertRaisesRegex(RuntimeError,'evaluation manifest changed'):
                 evaluation_rows(root)
@@ -56,6 +57,23 @@ class EvaluationAuditTests(unittest.TestCase):
                 evaluation_rows(root)
         with self.assertRaisesRegex(ValueError,'identical evaluated video sets'):
             bootstrap_pair([{'id':'one'}],[{'id':'two'}])
+
+    def test_spawned_decoder_process_reads_real_video(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            (root/'manifests').mkdir()
+            path=root/'clip.avi'
+            writer=cv2.VideoWriter(str(path),cv2.VideoWriter_fourcc(*'MJPG'),10.,(64,48))
+            self.assertTrue(writer.isOpened())
+            for i in range(10):writer.write(np.full((48,64,3),i*10,dtype=np.uint8))
+            writer.release()
+            write_csv(root/'manifests/grouped.csv',[dict(id='clip',path=str(path),dataset='CADP',label='1',
+                      split='test',duration='1',fps='10',file_sha256=sha256(path))])
+            report=audit(root,workers=1,executor='process')
+            self.assertEqual(report['total_eligible'],1)
+            self.assertEqual(report['total_excluded'],0)
+            self.assertEqual(report['executor'],'process')
+            self.assertEqual(evaluation_rows(root)[0][0]['id'],'clip')
 
     def test_recovery_keeps_completed_training_and_scores_and_backs_up_failure(self):
         with tempfile.TemporaryDirectory() as directory:
