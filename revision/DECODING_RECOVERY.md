@@ -40,3 +40,19 @@ python revision/recover_evaluations.py --root /results --workers-stopped
 같은 Docker image의 CPU 환경에서 데이터/토큰 계약, 큐 동시 claim·복구, 공통 평가 제외·해시·기존 점수 검증, 실제 인코딩 영상의 spawn 프로세스 검사를 포함한 **9개 테스트가 통과**했다. 원래 temporal sampler와 전처리는 변경하지 않았다. 실제 서버 평가의 디코딩 오류 지점 통과와 최종 평가 완료 여부는 STATUS에 별도로 기록한다.
 
 처음 8개 디코딩 스레드를 사용했으나 다중 스레드의 처리량이 단독 검사보다 크게 낮아지는 병목을 관측했다. 같은 입력 한 건의 단독 16/32프레임·5시간창 검사는 약 1.53초였다. 검사 함수를 바꾸지 않고 독립된 spawn 프로세스 4개로 격리하도록 변경했다. 이미 완료된 검사 저널의 동일 decoder/manifest 계약을 확인하고 이어간다. 실행 방식과 재사용 검사 수는 audit 결과에 저장한다.
+
+## 실서버 검사 결과와 재개 확인
+
+2026-11-07 16:45:30 KST 확인:
+
+- 실제 평가 시간창 검사 2,230영상 중 유효 2,229개, 제외 1개다. 제외는 위 UTIC test 정상 영상뿐이다. dev 737개와 UCF 1,150개는 유지하고 test는 양성 220/정상 122의 342개, 224그룹이다.
+- 학습 manifest SHA256은 `74fd4acfac1da2d85e98a888fef5c36b17d1083b9771b78634a416ec574ce9db`로 유지했다. 평가 manifest SHA256은 `f16ba14732608dcd43641d21c730833b5c4227962d1f68e86f5264565229c5a9`다.
+- 프로세스 방식은 기존 검사 1,637개를 이어받아 남은 593개를 약 222.5초에 검사했다. 예외를 무시하거나 검사 시간창 수를 줄인 것은 아니다.
+- 기존 평가 18개 run의 18,198개 점수에서 출처·라벨·그룹과 5개 시간창 샘플 시각을 검증했다. 정상 점수 저널을 유지했다.
+- old worker는 재시작 정책을 해제하고 `orv-revision-gpu{0,1}-pre-e534642` 이름으로 보존했다. 큐 DB·이전 작업 상태와 실패 로그는 서버에 남겼다. `results/recovery/latest.json`에서 DB 백업 디렉터리를 찾을 수 있다.
+- 16:42에 두 worker를 commit `e5346421158fbfbc8cf3ff9e84f9a7f77eed33ec`의 읽기 전용 release로 교체했다. GPU 0은 TimeSformer, GPU 1은 ViViT baseline 평가를 재개했다. 두 모델 모두 dev 737개와 test 342개를 완료해 이전 중단 지점을 통과했고 UCF 평가로 넘어갔다. 당시 새 실패는 0건이다.
+- 학습은 23/24회 완료했다. 마지막 seed 44는 epoch 2 checkpoint 저장 후 배포했으며 첫 baseline 평가 뒤 재개한다. 완료된 23개 best checkpoint의 16:44 SHA256 스냅샷은 서버의 `/disk1/orv_revision_20261106/recovery/completed_checkpoints_sha256_1644.json`에 보관했다.
+
+새 평가가 test를 통과한 것과 dev/test/UCF 전체가 완료된 것을 구분한다. 최종 모델 순위·집계는 외부 평가 완료 후 보고한다.
+
+16:48 재확인에서 두 baseline의 `metrics.json`에 기록된 checkpoint SHA256이 16:44 가중치 스냅샷과 일치했다. UCF 진행 표시는 ViViT 221/1,150, TimeSformer 141/1,150이며 새 실패는 0건이었다.

@@ -1,27 +1,27 @@
 # ORV revision 실행 상태
 
-확인 시각: **2026-11-07T16:01:17+09:00** (Asia/Seoul). 이 문서는 해당 시각의 GitHub 스냅샷이다. 최신 큐와 진행률은 server1의 `/disk1/orv_revision_20261106/results/STATUS.md`, `queue_status.json`, 각 run의 `progress.json`에 자동 기록된다.
+확인 시각: **2026-11-07T16:48:21+09:00** (Asia/Seoul). 이 문서는 해당 시각의 GitHub 스냅샷이다. 서버의 `/disk1/orv_revision_20261106/results/STATUS.md`, `queue_status.json`, 각 run의 `progress.json`이 최신 상태를 기록한다.
 
-사용자 요청에 따라 이번 업데이트는 **기록만 작성**한다. 실행 코드 수정, worker 교체, 데이터 제외, 실패 작업 재등록은 수행하지 않았다. 기존 worker와 큐는 계속 실행 중이다. 나중에 코드와 원고를 수정할 때 확인할 근거·위치·주의점은 [FOLLOW_UP_NOTES.md](FOLLOW_UP_NOTES.md)에 모았다.
+사용자가 디코딩 오류 수정 후 재실행을 요청해 **수정·검증·배포와 평가 재개를 완료**했다. 수정 근거와 재현 방법은 [DECODING_RECOVERY.md](DECODING_RECOVERY.md), 기존 원고 수정 메모는 [FOLLOW_UP_NOTES.md](FOLLOW_UP_NOTES.md)를 참고한다. 전체 실험이 완료됐다는 뜻은 아니다.
 
 ## 현재 실행
 
-| server1 GPU | 실행 내용 | 진행 |
+| server1 물리 GPU | 실행 내용 | 확인된 진행 |
 |---|---|---|
-| GPU 0 | ViViT output-only LoRA, CADP+UTIC, seed 43 | 3 epoch 완료, 다음 epoch 진행 |
-| GPU 1 | ViViT output-only LoRA, CADP+UTIC, seed 42 | 13 epoch 완료, 다음 epoch 진행 |
+| GPU 0 | TimeSformer QKV/output, mixed, seed 42 평가 | dev 737/737, test 342/342 완료; UCF 진행 표시 141/1150 |
+| GPU 1 | ViViT Q/K/V/output, mixed, seed 42 평가 | dev 737/737, test 342/342 완료; UCF 진행 표시 221/1150 |
 
-후속 작업은 공통 우선순위 큐에 등록돼 있다. **8설정 × 3seed = 24회 학습**, 각 best checkpoint의 dev/test/UCF 평가, 세 모델 자원 benchmark, 통계 집계, 주석 템플릿, 공통 설명·perturbation 진단을 순서대로 실행한다.
+두 모델 모두 이전에 멈춘 test 지점을 통과했다. 재개 후 실패는 현재 **0건**이다. 위 UCF 수는 `progress.json`의 표시이며 20개 간격으로 갱신돼 점수 저널의 실제 건수보다 적을 수 있다. 두 baseline 평가가 사용하는 checkpoint 해시는 완료된 학습 가중치의 16:44 SHA256 스냅샷과 일치했다.
 
 | 큐 상태 | 작업 수 |
 |---|---:|
-| pending | 13 |
+| pending | 29 |
 | running | 2 |
 | external_running | 0 |
-| completed | 28 |
-| failed | 18 |
+| completed | 31 |
+| failed | 0 |
 
-완료 28개는 **학습 21회 + 선행 작업 3개 + 기존 VideoMAE 진단 1개 + 분류 benchmark 3개**다. 학습은 총 24회 중 21회 완료(87.5%), 2회 실행, 1회 대기이며 학습 실패는 0회다. 주 실험·UTIC ablation 18회와 VideoMAE Q/K/V/output 교차 통제 3회가 모두 학습을 마쳤다. 새 grouped 평가 24건은 18건 실패, 6건 대기로 **완료된 최종 성능 비교는 아직 없다**.
+총 62작업이다. 완료 31개는 **학습 23회 + 선행 작업 3개 + legacy 진단 1개 + 분류 benchmark 3개 + 실제 평가 시간창 검사 1개**다. 새 grouped 평가 24건은 2건 실행, 22건 대기이며 dev/test/UCF를 모두 마친 최종 평가는 아직 0건이다. 복구 전 디코딩 실패 18건의 상태·오류와 기존 큐 DB는 백업 후 재등록했다.
 
 | 학습 설정 | seed 42 | seed 43 | seed 44 |
 |---|---|---|---|
@@ -31,30 +31,35 @@
 | ViViT Q/K/V/output, CADP-only | 완료 | 완료 | 완료 |
 | TimeSformer QKV/output, CADP-only | 완료 | 완료 | 완료 |
 | VideoMAE output-only, CADP-only | 완료 | 완료 | 완료 |
-| ViViT output-only, CADP+UTIC | 실행 중 | 실행 중 | 대기 |
+| ViViT output-only, CADP+UTIC | 완료 | 완료 | 재개 대기: 2 epoch 저장 |
 | VideoMAE Q/K/V/output, CADP+UTIC | 완료 | 완료 | 완료 |
 
-### 평가 중단 원인
+학습은 23/24회 완료이며 학습 실패는 0회다. 마지막 ViViT output-only seed 44는 배포 직전 epoch 2 저장을 마쳤고, 우선순위가 높은 첫 seed baseline 평가 뒤 마지막 완료 epoch부터 이어간다. 완료된 학습 23회를 다시 학습하지 않는다.
 
-세 모델 × 두 학습 조건 × 세 seed 평가 18건이 각각 2회 시도 후 `av.error.InvalidDataError: [h264] no frame!`로 중단됐다. 18건 모두 저널을 확인했으며 dev 737영상과 test 274영상의 점수가 저장돼 있고, 저널상 다음 입력은 동일한 **test 275번째 UTIC 정상 영상**이다. `progress.json`은 20개 간격으로 기록되므로 마지막 표시 261/343과 실제 완료 저널 274/343을 구분해야 한다. 10:35 확인 당시 6건에서 이후 12건이 추가됐으며, 같은 예외의 반복이다.
+## 디코딩 오류 처리와 공통 평가 집합
 
-예외 경로는 `run.py:evaluate → score_rows → common.py:read_window → container.decode`다. 이 입력의 파일 손상/seek 동작 원인을 분리하는 재현 검사는 아직 하지 않았다. 초기 데이터 검사는 일부 시점의 프레임을 확인하므로 실제 평가의 5개 4초 시간창 전체가 정상 디코딩된다는 보장이 없었다. 현재 학습 checkpoint가 실패했다는 근거는 없다.
+- 동일 UTIC 정상 영상이 마지막 4초 시간창에서 16/32프레임 모두 실패했고, 연속 디코딩에서도 손상 H.264 패킷 예외를 재현했다.
+- dev/test/UCF **2,230영상 전체**에 실제 평가와 같은 5개 4초 시간창을 16/32프레임으로 검사했다. 실패는 해당 UTIC 영상 1개뿐이었다.
+- 모든 모델·조건·seed에 동일한 공통 평가 목록을 적용한다. 모델 점수로 제외 영상을 선택하지 않았으며, 다른 영상이나 임의 프레임으로 대체하지 않았다.
+- 학습용 `grouped.csv`와 원본 영상은 유지한다. 별도 `evaluation.csv`의 해시, 평가 전후 출처별 클래스 수와 제외 사유를 저장한다.
 
-실패한 평가에 의존하는 baseline 통계·주석 템플릿과 그 후속 설명 진단은 대기한다. 기존 큐는 실행 가능한 다른 학습·평가를 계속 가져간다. 처리 규칙을 수정하지 않으면 후속 평가도 같은 입력에서 중단될 가능성이 있다. 향후 수정 절차는 [FOLLOW_UP_NOTES.md](FOLLOW_UP_NOTES.md)에 기록했다.
+| 평가 split | 검사 전 | 검사 후 | 양성 / 정상 | 검사 후 그룹 수 |
+|---|---:|---:|---:|---:|
+| dev | 737 | 737 | 486 / 251 | 450 |
+| test | 343 | 342 | 220 / 122 | 224 |
+| UCF external | 1150 | 1150 | 150 / 1000 | 926 |
 
-### 관측 속도와 완료 전망
+평가 manifest SHA256: `f16ba14732608dcd43641d21c730833b5c4227962d1f68e86f5264565229c5a9`. test에서 UTIC 정상만 109→108개로 바뀌었고 CADP 양성 220/정상 14는 같다. UCF 후보 격리 후의 양성 143/정상 995도 유지한다. 초기 부분 프레임 검사 통과와 이번 실제 평가 시간창 검사를 구분한다.
 
-아래는 완료된 run별 epoch 평균의 범위다. 초기화·평가 시간은 포함하지 않으며, 디스크/CPU 경합이 포함될 수 있다.
+기존 18개 평가의 **18,198개 영상 점수**는 같은 decoder/전처리 해시, precision, 출처·라벨·그룹과 샘플 시각 검증을 통과했다. 이 점수는 재사용하고 남은 입력부터 계산한다. run별 checkpoint·학습/평가 manifest·decoder 계약을 저장하며, 집계 시 서로 다른 평가 집합을 섞지 않는다.
 
-| 모델 | CADP+UTIC: 분/epoch | CADP-only: 분/epoch |
-|---|---:|---:|
-| ViViT Q/K/V/output | 4.00–5.55 | 2.57–3.41 |
-| TimeSformer QKV/output | 10.43–10.94 | 7.32–7.56 |
-| VideoMAE output-only | 3.01 (seed 42) | 1.62–1.74 |
+스레드 병렬 검사에서 처리량 저하를 관측해 독립 spawn 프로세스 4개로 전환했다. 이미 검사한 1,637개를 재사용하고 남은 593개를 약 222.5초에 검사했다. 검사 함수와 영상 샘플링·전처리 수식은 변경하지 않았다. 실제 인코딩 영상의 spawn 검사와 큐·공통 제외·기존 점수 검증을 포함한 **9개 테스트가 통과**했다.
 
-추가 완료된 VideoMAE Q/K/V/output 세 run은 12/18/13 epoch, run별 평균 약 5.68–8.31분/epoch였다. 이 평균에는 일부 긴 epoch가 포함돼 시간 변동이 크다. 실행 중인 ViViT output-only 두 run은 평균 약 3.82–4.29분/epoch다. 대기 중인 학습은 같은 설정 seed 44 한 건이다.
+## 속도와 완료 전망
 
-현재 속도와 지금까지 완료된 run의 종료 epoch(7–18)를 기준으로 **학습 24회 완료는 11월 7일 17–19시 전후로 추정**한다. early stopping 시점, 자원 경합, 중간 평가 작업에 따라 달라지며 보장 시각은 아니다. **전체 평가·모델 비교표·통계의 완료 시각은 별개다.** 디코딩 오류 처리와 실패 평가 재등록이 아직 수행되지 않았으므로 현재 큐가 학습을 마쳐도 최종 비교가 자동 완성되지는 않는다. 앞서 안내한 1차 비교 예상 시각은 이 오류로 지연됐고, 전체 ETA는 수정·재평가 일정이 정해진 뒤 다시 계산해야 한다.
+재개 초기 UCF 처리 속도는 모델별 약 **분당 45–60영상**이다. 남은 학습·24개 평가·통계·자동 설명 진단은 **11월 7일 22–24시 전후 완료를 추정**한다. 영상별 비용과 CPU/디스크 경합, 후속 집계 시간에 따라 자정을 넘길 수 있으며 보장 시각은 아니다. 사람의 도로 정상·onset·객체 box/ID 주석은 이 자동 큐 완료에 포함되지 않는다.
+
+첫 seed mixed 평가 3건을 우선 실행하고 남은 학습을 재개한 뒤 후속 평가·집계·주석 템플릿·설명 진단을 계속 진행한다. worker는 `unless-stopped`로 유지되고 재시작 시 마지막 완료 epoch/저널에서 이어간다.
 
 ## 완료된 진단 결과
 
@@ -114,7 +119,7 @@
 
 ## 실행 재현성·복구
 
-- 실행 코드 commit: [`71a25a6`](https://github.com/ikwak2/CCTV_accident_detection/commit/71a25a64c3c17645ee372edf3e650ebbfb97811b). worker는 해당 commit의 읽기 전용 release를 사용한다.
+- 기존 학습 코드 commit은 [`71a25a6`](https://github.com/ikwak2/CCTV_accident_detection/commit/71a25a64c3c17645ee372edf3e650ebbfb97811b), 수정 평가·재개 학습의 실행 코드는 [`e534642`](https://github.com/ikwak2/CCTV_accident_detection/commit/e5346421158fbfbc8cf3ff9e84f9a7f77eed33ec)다. 새 worker는 `/disk1/orv_revision_20261106/releases/e534642`를 읽기 전용으로 사용한다. sampler·전처리·모델 구성의 `common.py` 해시는 같다.
 - Docker image ID: `sha256:d250164d203b7a16e74362c6e4b4b48eff5f4348ab101192d4505a5ca408a61e`.
 - GPU UUID로 server1의 물리 GPU 0·1을 각각 고정하고 다른 GPU는 사용하지 않는다.
 - 원본 데이터는 읽기 전용 mount, 결과·cache는 별도 서버 디렉터리에 저장한다.
