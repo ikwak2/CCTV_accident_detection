@@ -1,6 +1,6 @@
 # ORV revision 실행 상태
 
-확인 시각: **2026-11-07T10:35:00+09:00** (Asia/Seoul). 이 문서는 해당 시각의 GitHub 스냅샷이다. 최신 큐와 진행률은 server1의 `/disk1/orv_revision_20261106/results/STATUS.md`, `queue_status.json`, 각 run의 `progress.json`에 자동 기록된다.
+확인 시각: **2026-11-07T16:01:17+09:00** (Asia/Seoul). 이 문서는 해당 시각의 GitHub 스냅샷이다. 최신 큐와 진행률은 server1의 `/disk1/orv_revision_20261106/results/STATUS.md`, `queue_status.json`, 각 run의 `progress.json`에 자동 기록된다.
 
 사용자 요청에 따라 이번 업데이트는 **기록만 작성**한다. 실행 코드 수정, worker 교체, 데이터 제외, 실패 작업 재등록은 수행하지 않았다. 기존 worker와 큐는 계속 실행 중이다. 나중에 코드와 원고를 수정할 때 확인할 근거·위치·주의점은 [FOLLOW_UP_NOTES.md](FOLLOW_UP_NOTES.md)에 모았다.
 
@@ -8,35 +8,35 @@
 
 | server1 GPU | 실행 내용 | 진행 |
 |---|---|---|
-| GPU 0 | VideoMAE output-only LoRA, CADP+UTIC, seed 44 | 10 epoch 완료, 다음 epoch 진행 |
-| GPU 1 | VideoMAE output-only LoRA, CADP+UTIC, seed 43 | 11 epoch 완료, 다음 epoch 진행 |
+| GPU 0 | ViViT output-only LoRA, CADP+UTIC, seed 43 | 3 epoch 완료, 다음 epoch 진행 |
+| GPU 1 | ViViT output-only LoRA, CADP+UTIC, seed 42 | 13 epoch 완료, 다음 epoch 진행 |
 
 후속 작업은 공통 우선순위 큐에 등록돼 있다. **8설정 × 3seed = 24회 학습**, 각 best checkpoint의 dev/test/UCF 평가, 세 모델 자원 benchmark, 통계 집계, 주석 템플릿, 공통 설명·perturbation 진단을 순서대로 실행한다.
 
 | 큐 상태 | 작업 수 |
 |---|---:|
-| pending | 30 |
+| pending | 13 |
 | running | 2 |
 | external_running | 0 |
-| completed | 23 |
-| failed | 6 |
+| completed | 28 |
+| failed | 18 |
 
-완료 23개는 **학습 16회 + 선행 작업 3개 + 기존 VideoMAE 진단 1개 + 분류 benchmark 3개**다. 학습은 총 24회 중 16회 완료, 2회 실행, 6회 대기이며 학습 실패는 0회다. 새 grouped 평가 24건은 6건 실패, 18건 대기로 **완료된 최종 성능 비교는 아직 없다**.
+완료 28개는 **학습 21회 + 선행 작업 3개 + 기존 VideoMAE 진단 1개 + 분류 benchmark 3개**다. 학습은 총 24회 중 21회 완료(87.5%), 2회 실행, 1회 대기이며 학습 실패는 0회다. 주 실험·UTIC ablation 18회와 VideoMAE Q/K/V/output 교차 통제 3회가 모두 학습을 마쳤다. 새 grouped 평가 24건은 18건 실패, 6건 대기로 **완료된 최종 성능 비교는 아직 없다**.
 
 | 학습 설정 | seed 42 | seed 43 | seed 44 |
 |---|---|---|---|
 | ViViT Q/K/V/output, CADP+UTIC | 완료 | 완료 | 완료 |
 | TimeSformer QKV/output, CADP+UTIC | 완료 | 완료 | 완료 |
-| VideoMAE output-only, CADP+UTIC | 완료 | 실행 중 | 실행 중 |
+| VideoMAE output-only, CADP+UTIC | 완료 | 완료 | 완료 |
 | ViViT Q/K/V/output, CADP-only | 완료 | 완료 | 완료 |
 | TimeSformer QKV/output, CADP-only | 완료 | 완료 | 완료 |
 | VideoMAE output-only, CADP-only | 완료 | 완료 | 완료 |
-| ViViT output-only, CADP+UTIC | 대기 | 대기 | 대기 |
-| VideoMAE Q/K/V/output, CADP+UTIC | 대기 | 대기 | 대기 |
+| ViViT output-only, CADP+UTIC | 실행 중 | 실행 중 | 대기 |
+| VideoMAE Q/K/V/output, CADP+UTIC | 완료 | 완료 | 완료 |
 
 ### 평가 중단 원인
 
-seed 42의 세 모델 × 두 학습 조건 평가 6건이 각각 2회 시도 후 `av.error.InvalidDataError: [h264] no frame!`로 중단됐다. 모든 작업에서 dev 737영상과 test 274영상의 점수가 저장돼 있고, 저널상 다음 입력은 동일한 **test 275번째 UTIC 정상 영상**이다. `progress.json`은 20개 간격으로 기록되므로 마지막 표시 261/343과 실제 완료 저널 274/343을 구분해야 한다.
+세 모델 × 두 학습 조건 × 세 seed 평가 18건이 각각 2회 시도 후 `av.error.InvalidDataError: [h264] no frame!`로 중단됐다. 18건 모두 저널을 확인했으며 dev 737영상과 test 274영상의 점수가 저장돼 있고, 저널상 다음 입력은 동일한 **test 275번째 UTIC 정상 영상**이다. `progress.json`은 20개 간격으로 기록되므로 마지막 표시 261/343과 실제 완료 저널 274/343을 구분해야 한다. 10:35 확인 당시 6건에서 이후 12건이 추가됐으며, 같은 예외의 반복이다.
 
 예외 경로는 `run.py:evaluate → score_rows → common.py:read_window → container.decode`다. 이 입력의 파일 손상/seek 동작 원인을 분리하는 재현 검사는 아직 하지 않았다. 초기 데이터 검사는 일부 시점의 프레임을 확인하므로 실제 평가의 5개 4초 시간창 전체가 정상 디코딩된다는 보장이 없었다. 현재 학습 checkpoint가 실패했다는 근거는 없다.
 
@@ -52,7 +52,9 @@ seed 42의 세 모델 × 두 학습 조건 평가 6건이 각각 2회 시도 후
 | TimeSformer QKV/output | 10.43–10.94 | 7.32–7.56 |
 | VideoMAE output-only | 3.01 (seed 42) | 1.62–1.74 |
 
-실행 중인 VideoMAE mixed 두 run은 약 3.0분/epoch다. 완료 run은 7–18 epoch에서 종료됐다. 남은 LoRA 교차 설정의 소요 시간과 early stopping 시점은 아직 관측되지 않았다. **앞서 안내한 1차 비교 예상 시각은 디코딩 오류로 지연됐다.** 최종 비교 완료 시각은 오류 처리와 재평가 시점이 정해진 뒤 다시 계산해야 하며, 현 상태에서는 확정할 수 없다.
+추가 완료된 VideoMAE Q/K/V/output 세 run은 12/18/13 epoch, run별 평균 약 5.68–8.31분/epoch였다. 이 평균에는 일부 긴 epoch가 포함돼 시간 변동이 크다. 실행 중인 ViViT output-only 두 run은 평균 약 3.82–4.29분/epoch다. 대기 중인 학습은 같은 설정 seed 44 한 건이다.
+
+현재 속도와 지금까지 완료된 run의 종료 epoch(7–18)를 기준으로 **학습 24회 완료는 11월 7일 17–19시 전후로 추정**한다. early stopping 시점, 자원 경합, 중간 평가 작업에 따라 달라지며 보장 시각은 아니다. **전체 평가·모델 비교표·통계의 완료 시각은 별개다.** 디코딩 오류 처리와 실패 평가 재등록이 아직 수행되지 않았으므로 현재 큐가 학습을 마쳐도 최종 비교가 자동 완성되지는 않는다. 앞서 안내한 1차 비교 예상 시각은 이 오류로 지연됐고, 전체 ETA는 수정·재평가 일정이 정해진 뒤 다시 계산해야 한다.
 
 ## 완료된 진단 결과
 
