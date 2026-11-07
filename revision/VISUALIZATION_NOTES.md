@@ -2,6 +2,8 @@
 
 2026-11-07 사용자 요청: 기존 원고에서는 ViViT이 좋았지만 새 분류 결과는 다른 모델이 더 높으므로, 다른 모델의 시각화도 다시 확인한다. 원고 자체는 수정하지 않았다.
 
+**후속 확인:** 원고 §5.4 / Table 6의 비교 방법은 attention rollout, LayerCAM, Grad-CAM++다. 아래 gradient × input은 추가 진단이며 원고의 CAM 방법 재현과 다르다. 원고의 세 방법으로 확장한 20사례 비교와 TimeSformer의 입력/내부 프레임 설정 불일치는 [CAM_COMPARISON_20.md](CAM_COMPARISON_20.md)에 기록한다. 아래 TimeSformer 관련 해석은 이 새 확인 사항과 함께 읽어야 한다.
+
 ## 확인한 결과
 
 **VideoMAE의 분류 성능이 높다는 결과와 설명 맵의 품질은 구분해야 한다.** 완료된 CADP+UTIC 주 실험의 3-seed 평균 UCF AUROC는 ViViT 0.74056, TimeSformer 0.81182, VideoMAE 0.89478이다. 이 수치는 공간적 사고 위치 설명의 우열을 측정하지 않는다. 분류 수치의 조건·외부 FPR 한계는 [INTERIM_RESULTS.md](INTERIM_RESULTS.md)에 있다.

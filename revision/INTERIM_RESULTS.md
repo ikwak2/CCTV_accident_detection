@@ -1,5 +1,7 @@
 # 주 실험 중간 결과
 
+**추가 확인 — TimeSformer 해석 보류:** 세 방법의 CAM 비교 과정에서 현재 TimeSformer checkpoint의 입력 32프레임 / 내부 `config.num_frames=8` 불일치를 확인했다. 아래 TimeSformer 지표는 이 설정으로 학습한 모델의 실제 측정값이다. 올바른 32프레임 attention 설정의 재학습 통제 전까지 backbone 자체의 성능·설명 우열로 해석하지 않는다. 실제 activation shape, 시각화 복원과 후속 실험은 [CAM_COMPARISON_20.md](CAM_COMPARISON_20.md)에 기록한다. 기존 가중치와 점수를 덮어쓰지 않았다.
+
 확인 시각: **2026-11-07 21:34 KST**. 학습 24회는 모두 완료했고 평가 24건 중 20건을 마쳤다. 아래는 완료된 CADP+UTIC 주 실험의 seed 42/43/44 지표를 직접 집계한 값이다. 전체 통계 작업 `stats_all`과 LoRA 교차 통제 4개 평가는 아직 남아 있다.
 
 ## 공통 조건과 평가 집합

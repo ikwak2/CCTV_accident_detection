@@ -8,6 +8,8 @@
 
 새 checkpoint의 세 모델 공통 설명 맵, 수정한 VideoMAE rollout, 시각화의 관찰·한계와 재현 방법은 [VISUALIZATION_NOTES.md](VISUALIZATION_NOTES.md)에 기록했다. 분류 성능 순위와 설명 품질을 구분한다.
 
+원고의 **attention rollout · LayerCAM · Grad-CAM++**를 사고 10개·도로 비사고 10개에 비교한 후속 작업과, 시각화 과정에서 발견한 **TimeSformer 입력 32 / 내부 설정 8프레임 불일치**는 [CAM_COMPARISON_20.md](CAM_COMPARISON_20.md)를 참고한다. 앞서의 gradient × input은 원고에 없는 추가 진단 방법이다.
+
 ## 실행 범위
 
 - **server1의 물리 GPU 0·1**에 worker 하나씩 배정한다. 컨테이너 안에서는 배정된 GPU만 `cuda:0`으로 보인다.

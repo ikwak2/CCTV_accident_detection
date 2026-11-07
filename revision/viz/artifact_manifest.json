@@ -1,0 +1,119 @@
+{
+  "source_render_manifest_sha256": "838bb4dfd615a85bf036fe67055053cd7e0ed1c1384afcf49d41a3f80eedaf2b",
+  "files": {
+    "A01_comparison.png": {
+      "bytes": 1336851,
+      "sha256": "9c9c217f01d4cc326a68ea6b86140a8f97709cacba984e59b3c7749e1a0273b0"
+    },
+    "A02_comparison.png": {
+      "bytes": 1105889,
+      "sha256": "7836e246405e5d22244dd52942221b9c018bec94cd35f99b123071949a02e981"
+    },
+    "A03_comparison.png": {
+      "bytes": 1275654,
+      "sha256": "79d34d9aaa1d1a031ea06123bf2e5302af2eff17b53b3387bb37206cd76ba013"
+    },
+    "A04_comparison.png": {
+      "bytes": 1022758,
+      "sha256": "47bd24cfdb47891b1f1bf1e054d6b2fb7e765bbe23a300943ac2efdf06f80823"
+    },
+    "A05_comparison.png": {
+      "bytes": 1497248,
+      "sha256": "4ec975fd6dae66dbb87f616202b52706ad0ae446f68a93e6ee97628e1408a19b"
+    },
+    "A06_comparison.png": {
+      "bytes": 1254091,
+      "sha256": "8d4ba0a344eb1a0084e04ea11a24fe915b04ca6a7b11b1039870cc3a95f02842"
+    },
+    "A07_comparison.png": {
+      "bytes": 1193257,
+      "sha256": "2e29fc1833a8234d747f0ddbf6d34a21fa8fcd7d4d10bcd3f42cf3c300b2151f"
+    },
+    "A08_comparison.png": {
+      "bytes": 1495359,
+      "sha256": "b2590fd1e9fad5ad5d04d26464a345fe8e08b8e40a39b0b6148915215505aa6c"
+    },
+    "A09_comparison.png": {
+      "bytes": 916733,
+      "sha256": "bdb6146f0fdd412998698df1591a96e8e715449163225ccf348cd7075a1ddc54"
+    },
+    "A10_comparison.png": {
+      "bytes": 1294518,
+      "sha256": "f348a7d046f29dfc630d08568667838af82864db1e08d232e215cd471cdfbf0b"
+    },
+    "N01_comparison.png": {
+      "bytes": 1419571,
+      "sha256": "26031632ad5a9968f39833df59b6a122efc1f199b432f1936f9513c7db9d045c"
+    },
+    "N02_comparison.png": {
+      "bytes": 1303789,
+      "sha256": "ab6bc401a6eb8f4a5e50121d98dca32f39c3812241f44c575f5741b83d50ef9d"
+    },
+    "N03_comparison.png": {
+      "bytes": 1302264,
+      "sha256": "3d1ef7f0f6aacce16f2651fd94872f1af630b372ce2c89997dc19a7bae750ccc"
+    },
+    "N04_comparison.png": {
+      "bytes": 1437440,
+      "sha256": "88002b247c840b5fc93d096b63e1e1a94bbcc01abd630952de43b9164d712881"
+    },
+    "N05_comparison.png": {
+      "bytes": 1463427,
+      "sha256": "65980ceaadd7166b1ebc514ff5242cc23e65bcbfd48250bc95a63c028cf4ddd1"
+    },
+    "N06_comparison.png": {
+      "bytes": 1069458,
+      "sha256": "ee28d4633b751e19f2915d4b3820192f9ce94caad5df8545504667f9c5b66398"
+    },
+    "N07_comparison.png": {
+      "bytes": 1366240,
+      "sha256": "3235d42c359aaa20a00e25d0223269d1d5dd0f781e846b84fde0a8947111e879"
+    },
+    "N08_comparison.png": {
+      "bytes": 1361109,
+      "sha256": "30e3f2129f4b80bbf1ba8c11b826e6ca69d5b2dd80d9630a22f0feeb1dc9be46"
+    },
+    "N09_comparison.png": {
+      "bytes": 1414628,
+      "sha256": "e72deb0d4cd1a00c5c78fa424713f142a125c6af5efb68d8918bf60093900cc3"
+    },
+    "N10_comparison.png": {
+      "bytes": 1297721,
+      "sha256": "5812ddaa024f1938479fd7802d5652fc7925ccc0cc48fec0af88b038f833dfea"
+    },
+    "README.md": {
+      "bytes": 3030,
+      "sha256": "9d2c7b6da4d377957eda7adb7be987e52ab4b97f61cad3a5dd502c7f393e66d5"
+    },
+    "accident_10_details.pdf": {
+      "bytes": 30651792,
+      "sha256": "c313959573e2f740d120c5045bc0b9b16b30a074d37c1e309ef9f2f39fbfc913"
+    },
+    "all_20_comparisons.pdf": {
+      "bytes": 13824714,
+      "sha256": "46c04a2e3319d56ecac9ae6ef100020547ab0f3e5c9a678a5c65622c3d9395bf"
+    },
+    "diagnostics.csv": {
+      "bytes": 24143,
+      "sha256": "1abdf98b658054c23b5fab6523fda4953593c459fa8d12ff1a10f4febb29ed14"
+    },
+    "index.html": {
+      "bytes": 8933,
+      "sha256": "50a69eb83d81f0a8fde9d8f0e8faf7a24d363a048a4f3ecee54a3cb505410d4a"
+    },
+    "nonaccident_10_details.pdf": {
+      "bytes": 34158946,
+      "sha256": "7eeb3bf3cd963beb4724db99545d30c43cbf68f0a21b761b8c1c4e3e75c7a68f"
+    },
+    "summary.json": {
+      "bytes": 2397,
+      "sha256": "172ef68ea87a7e46577c5367856319c175de7fedf937112f8be347d801d46b39"
+    }
+  },
+  "pdf_pages": {
+    "all_20_comparisons.pdf": 20,
+    "accident_10_details.pdf": 40,
+    "nonaccident_10_details.pdf": 40
+  },
+  "scope": "Requested derived figures and generic case diagnostics only; no raw video, source IDs, paths, or NPZ arrays"
+}

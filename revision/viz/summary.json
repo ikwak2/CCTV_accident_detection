@@ -1,0 +1,146 @@
+[
+  {
+    "label": 1,
+    "model": "ViViT",
+    "method": "rollout",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 1,
+    "model": "ViViT",
+    "method": "layercam",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 1,
+    "model": "ViViT",
+    "method": "gradcampp",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 1,
+    "model": "TimeSformer",
+    "method": "rollout",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 1,
+    "model": "TimeSformer",
+    "method": "layercam",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 1,
+    "model": "TimeSformer",
+    "method": "gradcampp",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 1,
+    "model": "VideoMAE",
+    "method": "rollout",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 1,
+    "model": "VideoMAE",
+    "method": "layercam",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 1,
+    "model": "VideoMAE",
+    "method": "gradcampp",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 0,
+    "model": "ViViT",
+    "method": "rollout",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 0,
+    "model": "ViViT",
+    "method": "layercam",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 0,
+    "model": "ViViT",
+    "method": "gradcampp",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 0,
+    "model": "TimeSformer",
+    "method": "rollout",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 0,
+    "model": "TimeSformer",
+    "method": "layercam",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 0,
+    "model": "TimeSformer",
+    "method": "gradcampp",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 0,
+    "model": "VideoMAE",
+    "method": "rollout",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 0,
+    "model": "VideoMAE",
+    "method": "layercam",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  },
+  {
+    "label": 0,
+    "model": "VideoMAE",
+    "method": "gradcampp",
+    "cases": 10,
+    "nonzero": 10,
+    "zero_signal": 0
+  }
+]
