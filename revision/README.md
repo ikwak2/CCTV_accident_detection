@@ -1,6 +1,6 @@
 # ORV revision experiments
 
-논문 수정 전략과 리뷰 의견별 대응은 [PLAN.md](PLAN.md), 실제 실행 상태는 [STATUS.md](STATUS.md)를 참고한다.
+논문 수정 전략과 리뷰 의견별 대응은 [PLAN.md](PLAN.md), 실제 실행 상태는 [STATUS.md](STATUS.md)를 참고한다. 나중에 코드·원고를 수정할 때 볼 확인 근거와 위치, 현재 평가 디코딩 오류의 후속 절차는 [FOLLOW_UP_NOTES.md](FOLLOW_UP_NOTES.md)에 기록한다.
 
 ## 실행 범위
 
